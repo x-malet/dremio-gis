@@ -23,6 +23,7 @@ import com.dremio.exec.expr.SimpleFunction;
 import com.dremio.exec.expr.annotations.FunctionTemplate;
 import com.dremio.exec.expr.annotations.Output;
 import com.dremio.exec.expr.annotations.Param;
+import org.apache.arrow.memory.ArrowBuf;
 
 @FunctionTemplate(name = "st_touches", scope = FunctionTemplate.FunctionScope.SIMPLE,
   nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
@@ -37,7 +38,7 @@ public class STTouches implements SimpleFunction {
   org.apache.arrow.vector.holders.BitHolder out;
 
   @Inject
-  io.netty.buffer.ArrowBuf buffer;
+  ArrowBuf buffer;
 
   public void setup() {
   }
@@ -51,8 +52,6 @@ public class STTouches implements SimpleFunction {
     geom2 = com.esri.core.geometry.ogc.OGCGeometry
         .fromBinary(geom2Param.buffer.nioBuffer(geom2Param.start, geom2Param.end - geom2Param.start));
 
-    int touches = geom1.touches(geom2) ? 1 : 0;
-
-    out.value = touches;
+    out.value = geom1.touches(geom2) ? 1 : 0;
   }
 }

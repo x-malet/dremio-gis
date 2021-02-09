@@ -23,6 +23,7 @@ import com.dremio.exec.expr.SimpleFunction;
 import com.dremio.exec.expr.annotations.FunctionTemplate;
 import com.dremio.exec.expr.annotations.Output;
 import com.dremio.exec.expr.annotations.Param;
+import org.apache.arrow.memory.ArrowBuf;
 
 @FunctionTemplate(name = "st_x", scope = FunctionTemplate.FunctionScope.SIMPLE,
   nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
@@ -34,7 +35,7 @@ public class STXFunc implements SimpleFunction {
   org.apache.arrow.vector.holders.Float8Holder out;
 
   @Inject
-  io.netty.buffer.ArrowBuf buffer;
+  ArrowBuf buffer;
 
   public void setup() {
   }

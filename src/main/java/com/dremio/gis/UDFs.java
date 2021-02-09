@@ -6,6 +6,7 @@ package com.dremio.gis;
 //import com.dremio.exec.expr.annotations.FunctionTemplate;
 //import com.dremio.exec.expr.annotations.Output;
 //import com.dremio.exec.expr.annotations.Param;
+//import org.apache.arrow.memory.ArrowBuf;
 
 public class UDFs {
 //    @FunctionTemplate(name = "st_geomfromtext", scope = FunctionTemplate.FunctionScope.SIMPLE,
@@ -18,7 +19,7 @@ public class UDFs {
 //        org.apache.arrow.vector.holders.VarBinaryHolder out;
 //
 //        @Inject
-//        io.netty.buffer.ArrowBuf buffer;
+//        ArrowBuf buffer;
 //
 //        public void setup() {
 //        }

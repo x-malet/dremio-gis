@@ -19,14 +19,16 @@ package com.dremio.gis;
 
 import javax.inject.Inject;
 
-import org.osgeo.proj4j.CRSFactory;
-import org.osgeo.proj4j.CoordinateTransform;
+import org.locationtech.proj4j.CRSFactory;
+import org.locationtech.proj4j.CoordinateTransform;
 
 import com.dremio.exec.expr.SimpleFunction;
 import com.dremio.exec.expr.annotations.FunctionTemplate;
 import com.dremio.exec.expr.annotations.Output;
 import com.dremio.exec.expr.annotations.Param;
 import com.dremio.exec.expr.annotations.Workspace;
+import org.apache.arrow.memory.ArrowBuf;
+
 
 @FunctionTemplate(name = "st_transform", scope = FunctionTemplate.FunctionScope.SIMPLE,
   nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
@@ -53,32 +55,32 @@ public class STTransform implements SimpleFunction {
   org.apache.arrow.vector.holders.VarBinaryHolder out;
 
   @Inject
-  io.netty.buffer.ArrowBuf buffer;
+  ArrowBuf buffer;
 
   public void setup() {
     int sridSrc = sridSrcParam.value;
     sridTgt = sridTgtParam.value;
 
-    org.osgeo.proj4j.CoordinateReferenceSystem srcCrs =
-        new org.osgeo.proj4j.CRSFactory().createFromName("EPSG:" + sridSrc);
+    org.locationtech.proj4j.CoordinateReferenceSystem srcCrs =
+        new org.locationtech.proj4j.CRSFactory().createFromName("EPSG:" + sridSrc);
 
-    org.osgeo.proj4j.CoordinateReferenceSystem tgtCrs =
-        new org.osgeo.proj4j.CRSFactory().createFromName("EPSG:" + sridTgt);
+    org.locationtech.proj4j.CoordinateReferenceSystem tgtCrs =
+        new org.locationtech.proj4j.CRSFactory().createFromName("EPSG:" + sridTgt);
 
-    transform = new org.osgeo.proj4j.BasicCoordinateTransform(srcCrs, tgtCrs);
+    transform = new org.locationtech.proj4j.BasicCoordinateTransform(srcCrs, tgtCrs);
   }
 
   public void eval() {
     com.esri.core.geometry.ogc.OGCGeometry geomSrc = com.esri.core.geometry.ogc.OGCGeometry
         .fromBinary(geom1Param.buffer.nioBuffer(geom1Param.start, geom1Param.end - geom1Param.start));
 
-    org.osgeo.proj4j.ProjCoordinate result = new org.osgeo.proj4j.ProjCoordinate();
+    org.locationtech.proj4j.ProjCoordinate result = new org.locationtech.proj4j.ProjCoordinate();
     com.esri.core.geometry.SpatialReference sr = com.esri.core.geometry.SpatialReference.create(sridTgt);
     java.nio.ByteBuffer geomBytes = null;
 
     if(geomSrc != null && geomSrc.geometryType().equals("Point")){
       com.esri.core.geometry.ogc.OGCPoint pointGeom = (com.esri.core.geometry.ogc.OGCPoint) geomSrc;
-      result = transform.transform(new org.osgeo.proj4j.ProjCoordinate(pointGeom.X(), pointGeom.Y()), result);
+      result = transform.transform(new org.locationtech.proj4j.ProjCoordinate(pointGeom.X(), pointGeom.Y()), result);
 
       geomBytes = new com.esri.core.geometry.ogc.OGCPoint(
           new com.esri.core.geometry.Point(result.x, result.y), sr).asBinary();
@@ -88,7 +90,7 @@ public class STTransform implements SimpleFunction {
           com.esri.core.geometry.VertexGeomAccessor.getVertexGeometry(esriGeom);
       for (int i = 0; i < vertexGeom.getPointCount(); i++){
         com.esri.core.geometry.Point point = vertexGeom.getPoint(i);
-        result = transform.transform(new org.osgeo.proj4j.ProjCoordinate(point.getX(), point.getY()), result);
+        result = transform.transform(new org.locationtech.proj4j.ProjCoordinate(point.getX(), point.getY()), result);
         point.setXY(result.x, result.y);
         vertexGeom.setPoint(i, point);
       }

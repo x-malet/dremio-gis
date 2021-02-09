@@ -23,6 +23,7 @@ import com.dremio.exec.expr.SimpleFunction;
 import com.dremio.exec.expr.annotations.FunctionTemplate;
 import com.dremio.exec.expr.annotations.Output;
 import com.dremio.exec.expr.annotations.Param;
+import org.apache.arrow.memory.ArrowBuf;
 
 @FunctionTemplate(name = "st_astext", scope = FunctionTemplate.FunctionScope.SIMPLE,
   nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
@@ -34,7 +35,7 @@ public class STAsText implements SimpleFunction {
   org.apache.arrow.vector.holders.VarCharHolder out;
 
   @Inject
-  io.netty.buffer.ArrowBuf buffer;
+  ArrowBuf buffer;
 
   public void setup() {
   }
@@ -47,6 +48,8 @@ public class STAsText implements SimpleFunction {
 
     int outputSize = geomWKT.getBytes().length;
     buffer = out.buffer = buffer.reallocIfNeeded(outputSize);
+//    buffer = out.buffer = buffer.arrowBuf().reallocIfNeeded(outputSize);
+
     out.start = 0;
     out.end = outputSize;
     buffer.setBytes(0, geomWKT.getBytes());
