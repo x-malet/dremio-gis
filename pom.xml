@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.dremio.gis</groupId>
     <artifactId>dremio-gis</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.4-SNAPSHOT</version>
 
     <repositories>
         <repository>
@@ -23,6 +23,7 @@
             <groupId>com.dremio.sabot</groupId>
             <artifactId>dremio-sabot-kernel</artifactId>
             <version>LATEST</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.arrow</groupId>
