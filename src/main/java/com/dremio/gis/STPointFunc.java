@@ -23,11 +23,16 @@ import com.dremio.exec.expr.SimpleFunction;
 import com.dremio.exec.expr.annotations.FunctionTemplate;
 import com.dremio.exec.expr.annotations.Output;
 import com.dremio.exec.expr.annotations.Param;
+import com.dremio.gis.geom_utils.BinaryGeomUtils;
 import org.apache.arrow.memory.ArrowBuf;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateXY;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 
 @FunctionTemplate(name = "st_point", scope = FunctionTemplate.FunctionScope.SIMPLE,
   nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
-public class STPointFunc implements SimpleFunction {
+public class STPointFunc extends BinaryGeomUtils implements SimpleFunction {
   @Param
   org.apache.arrow.vector.holders.Float8Holder lonParam;
 
@@ -48,10 +53,10 @@ public class STPointFunc implements SimpleFunction {
     double lon = lonParam.value;
     double lat = latParam.value;
 
-    com.esri.core.geometry.ogc.OGCPoint point = new com.esri.core.geometry.ogc.OGCPoint(
-        new com.esri.core.geometry.Point(lon, lat), com.esri.core.geometry.SpatialReference.create(4326));
+    Point point = new GeometryFactory().createPoint(new CoordinateXY(lon, lat));
+    point.setSRID(4326);
 
-    java.nio.ByteBuffer pointBytes = point.asBinary();
+    java.nio.ByteBuffer pointBytes = this.getBinary(point);
     out.buffer = buffer;
     out.start = 0;
     out.end = pointBytes.remaining();

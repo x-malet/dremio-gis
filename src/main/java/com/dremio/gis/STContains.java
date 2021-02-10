@@ -23,11 +23,13 @@ import com.dremio.exec.expr.SimpleFunction;
 import com.dremio.exec.expr.annotations.FunctionTemplate;
 import com.dremio.exec.expr.annotations.Output;
 import com.dremio.exec.expr.annotations.Param;
+import com.dremio.gis.geom_utils.BinaryGeomUtils;
 import org.apache.arrow.memory.ArrowBuf;
+import org.locationtech.jts.geom.Geometry;
 
 @FunctionTemplate(name = "st_contains", scope = FunctionTemplate.FunctionScope.SIMPLE,
   nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
-public class STContains implements SimpleFunction {
+public class STContains extends BinaryGeomUtils implements SimpleFunction {
   @Param
   org.apache.arrow.vector.holders.VarBinaryHolder geom1Param;
 
@@ -44,16 +46,9 @@ public class STContains implements SimpleFunction {
   }
 
   public void eval() {
-    com.esri.core.geometry.ogc.OGCGeometry geom1;
-    com.esri.core.geometry.ogc.OGCGeometry geom2;
+    Geometry geom1 = this.getGeometry(geom1Param);
+    Geometry geom2 = this.getGeometry(geom2Param);
 
-    geom1 = com.esri.core.geometry.ogc.OGCGeometry
-        .fromBinary(geom1Param.buffer.nioBuffer(geom1Param.start, geom1Param.end - geom1Param.start));
-    geom2 = com.esri.core.geometry.ogc.OGCGeometry
-        .fromBinary(geom2Param.buffer.nioBuffer(geom2Param.start, geom2Param.end - geom2Param.start));
-
-    int contains = geom1.contains(geom2) ? 1 : 0;
-
-    out.value = contains;
+    out.value = geom1.contains(geom2) ? 1 : 0;
   }
 }

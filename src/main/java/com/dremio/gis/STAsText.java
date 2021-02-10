@@ -23,11 +23,14 @@ import com.dremio.exec.expr.SimpleFunction;
 import com.dremio.exec.expr.annotations.FunctionTemplate;
 import com.dremio.exec.expr.annotations.Output;
 import com.dremio.exec.expr.annotations.Param;
+import com.dremio.gis.geom_utils.BinaryGeomUtils;
 import org.apache.arrow.memory.ArrowBuf;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
 
 @FunctionTemplate(name = "st_astext", scope = FunctionTemplate.FunctionScope.SIMPLE,
   nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
-public class STAsText implements SimpleFunction {
+public class STAsText extends BinaryGeomUtils implements SimpleFunction {
   @Param
   org.apache.arrow.vector.holders.VarBinaryHolder geom1Param;
 
@@ -41,15 +44,10 @@ public class STAsText implements SimpleFunction {
   }
 
   public void eval() {
-    com.esri.core.geometry.ogc.OGCGeometry geom1 = com.esri.core.geometry.ogc.OGCGeometry
-        .fromBinary(geom1Param.buffer.nioBuffer(geom1Param.start, geom1Param.end - geom1Param.start));
-
-    String geomWKT = geom1.asText();
+    String geomWKT = this.getGeometry(geom1Param).toText();
 
     int outputSize = geomWKT.getBytes().length;
     buffer = out.buffer = buffer.reallocIfNeeded(outputSize);
-//    buffer = out.buffer = buffer.arrowBuf().reallocIfNeeded(outputSize);
-
     out.start = 0;
     out.end = outputSize;
     buffer.setBytes(0, geomWKT.getBytes());
